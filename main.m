@@ -1,4 +1,10 @@
-rgbIm = imread('hammer.jpg');
+curr_dir = cd;
+data_folder = fullfile(curr_dir, "data");
+addpath(fullfile(curr_dir, "src"));
+[imgs, lbls] = load_imgs_std_sz_lbls(data_folder, "*.jpg", [500, 500]);
+
+%%
+rgbIm = squeeze(imgs(1, :, :, :));
 grayIm = rgb2gray(rgbIm);
 
 edgeThresh = 0.9;
@@ -9,7 +15,7 @@ edgeIm = edge(grayIm, 'Canny', edgeThresh);
 cornerIm = corner(edgeIm, 'Harris');
 theta = zeros(length(cornerIm(:,1)));
 for i = 1:length(cornerIm(:,1))
-theta(:,i) = Gdir(cornerIm(i,2),cornerIm(i,1));
+    theta(:,i) = Gdir(cornerIm(i,2),cornerIm(i,1));
 end
 
 D = pdist(cornerIm);
