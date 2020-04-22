@@ -25,7 +25,8 @@ plot(corners)
 
 %%
 % Create the Hough transform using the binary image.
-[H,T,R] = hough(imrotate(edgeIm, 33, 'crop'));
+rot_edge_im = imrotate(edgeIm, 33, 'crop');
+[H,T,R] = hough(rot_edge_im);
 imshow(H,[],'XData',T,'YData', R, ...
             'InitialMagnification','fit');
 xlabel('\theta'), ylabel('\rho');
@@ -36,8 +37,8 @@ P  = houghpeaks(H, 100, 'threshold', ceil(0.3*max(H(:))));
 x = T(P(:,2)); y = R(P(:,1));
 plot(x,y,'s','color','white');
 
-lines = houghlines(edgeIm ,T,R,P,'FillGap',5,'MinLength',7);
-figure, imshow(rgbIm), hold on
+lines = houghlines(rot_edge_im ,T,R,P,'FillGap',5,'MinLength',7);
+figure, imshow(rot_edge_im), hold on
 max_len = 0;
 for k = 1:length(lines)
    xy = [lines(k).point1; lines(k).point2];
