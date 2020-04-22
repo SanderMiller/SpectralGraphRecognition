@@ -7,18 +7,57 @@ addpath(fullfile(curr_dir, "src"));
 rgbIm = squeeze(imgs(1, :, :, :));
 grayIm = rgb2gray(rgbIm);
 
-edgeThresh = 0.9;
+edgeThresh = 0.7;
 distThresh = 60;
 edgeIm = edge(grayIm, 'Canny', edgeThresh);
 [Gx,Gy] = imgradientxy(grayIm, 'Sobel');
-[Gmag,Gdir] = imgradient(Gx,Gy);
-cornerIm = corner(edgeIm, 'Harris');
-theta = zeros(length(cornerIm(:,1)));
-for i = 1:length(cornerIm(:,1))
-    theta(:,i) = Gdir(cornerIm(i,2),cornerIm(i,1));
+[Gmag, Gdir] = imgradient(Gx,Gy);
+corners = detectHarrisFeatures(grayIm, 'FilterSize', 9, 'MinQuality', 0.01);
+corners = corners.selectStrongest(50);
+theta = zeros(1, 50);
+for i = 1:50
+    loc = corners(1).Location;
+    theta(i) = Gdir(int16(loc(1)), int16(loc(2)));
+end
+imshow(grayIm);
+hold on;
+plot(corners)
+
+%%
+% Create the Hough transform using the binary image.
+[H,T,R] = hough(imrotate(edgeIm, 33, 'crop'));
+imshow(H,[],'XData',T,'YData', R, ...
+            'InitialMagnification','fit');
+xlabel('\theta'), ylabel('\rho');
+axis on, axis normal, hold on;
+
+% Find peaks in the Hough transform of the image.
+P  = houghpeaks(H, 100, 'threshold', ceil(0.3*max(H(:))));
+x = T(P(:,2)); y = R(P(:,1));
+plot(x,y,'s','color','white');
+
+lines = houghlines(edgeIm ,T,R,P,'FillGap',5,'MinLength',7);
+figure, imshow(rgbIm), hold on
+max_len = 0;
+for k = 1:length(lines)
+   xy = [lines(k).point1; lines(k).point2];
+   plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','green');
+
+   % Plot beginnings and ends of lines
+   plot(xy(1,1),xy(1,2),'x','LineWidth',2,'Color','yellow');
+   plot(xy(2,1),xy(2,2),'x','LineWidth',2,'Color','red');
+
+   % Determine the endpoints of the longest line segment
+   len = norm(lines(k).point1 - lines(k).point2);
+   if ( len > max_len)
+      max_len = len;
+      xy_long = xy;
+   end
 end
 
-D = pdist(cornerIm);
+
+%%
+D = pdist(corners);
 Dist = squareform(D);
 Dist(Dist>distThresh) = 0;
 Y = Dist;
@@ -48,7 +87,7 @@ title('Edge Detection')
 subplot(2,3,3)
 imshow(edgeIm)
 hold on
-plot(cornerIm(:,1), cornerIm(:,2),'r.')
+plot(corners(:,1), corners(:,2),'r.')
 title('Harris Corner Detection')
 
 subplot(2,3,4)
@@ -56,11 +95,11 @@ plot(G,'Layout','force')
 title('Layed Out Graph')
 
 subplot(2,3,5)
-plot(G,'XData',cornerIm(:,1),'YData',-cornerIm(:,2))
+plot(G,'XData',corners(:,1),'YData',-corners(:,2))
 title('In Place Graph')
 
 subplot(2,3,6)
-plot(G,'XData',cornerIm(:,1),'YData',-cornerIm(:,2),'EdgeLabel',G.Edges.Weight)
+plot(G,'XData',corners(:,1),'YData',-corners(:,2),'EdgeLabel',G.Edges.Weight)
 title('In Place Graph with Weights')
 
 
