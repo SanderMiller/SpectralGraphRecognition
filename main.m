@@ -1,5 +1,6 @@
 %% Load and Crop Image
-clear
+clear;
+clear fig;
 curr_dir = cd;
 data_folder = fullfile(curr_dir, "data");
 addpath(fullfile(curr_dir, "src"));
@@ -7,8 +8,10 @@ addpath(fullfile(curr_dir, "src"));
 
 %% Generate Edge Detected Image
 % Load Image and convert to Gray
-rgbIm = squeeze(imgs(1, :, :, :));
-grayIm = imrotate(rgb2gray(rgbIm),0);
+imageIndex = 1;
+rgbIm = squeeze(imgs(imageIndex, :, :, :));
+grayIm = imrotate(rgb2gray(rgbIm),180, 'loose');
+
 
 % Generate Canny Edge Image
 edgeThresh = 0.4;
@@ -29,45 +32,69 @@ axis on, axis normal, hold on;
 P  = houghpeaks(H, 100, 'threshold', ceil(0.0*max(H(:))));
 theta = T(P(:,2)); rho = R(P(:,1));
 
-%% Determine if Graph needs to be shifted Across a Period
-sortedTheta = sort(theta)
-difference = max(diff(sortedTheta))
-
-span = max(theta)-min(theta)
-
+%%Normalize Peaks
+[shiftedThetaOrig, shiftedRhoOrig, thetaShiftOrig] = houghPeakNormalization(theta,rho);
 %%
-if difference > 180-span
-firstNode = sortedTheta(find(diff(sortedTheta) == difference)+1)
-thetaShift = -90+(difference/2)-firstNode
-shiftedTheta = theta+thetaShift
-wrappedPoints = ones(1,length(shiftedTheta))
-
-
-wrappedPoints = wrappedPoints - (2.*(shiftedTheta()<-90))
-shiftedRho = rho.*wrappedPoints
-shiftedTheta(shiftedTheta<-90) = shiftedTheta(shiftedTheta<-90)+180
-shiftedTheta(shiftedTheta>90) = shiftedTheta(shiftedTheta>90)-180
-end
-%%
-[HRot,TRot,RRot] = hough(imrotate(edgeIm,-thetaShift));
+[HRot,TRot,RRot] = hough(imrotate(edgeIm,-thetaShiftOrig));
+% Find peaks in the Hough transform of the image.
+PRot  = houghpeaks(HRot, 100, 'threshold', ceil(0.0*max(HRot(:))));
+thetaRot = TRot(PRot(:,2)); rhoRot = RRot(PRot(:,1));
+[shiftedThetaRot, shiftedRhoRot, thetaShiftRot] = houghPeakNormalization(thetaRot,rhoRot);
 
 %Plot Hough Curves
+subplot(3,3,1)
+imshow(grayIm);
+title('Original Image')
 
+subplot(3,3,2)
+imshow(H,[],'XData',T,'YData', R, ...
+            'InitialMagnification','fit');
+xlabel('\theta'), ylabel('\rho');
+axis on, axis normal, hold on;
+plot(theta,rho,'s','color','w');
+title('Original Image Hough Transform')
+
+subplot(3,3,3)
+plot(theta, rho,'s','color','black');
+xlim([-90 90])
+ylim([-1000 1000])
+title('Original Image Hough Transform')
+
+subplot(3,3,4)
+imshow(imrotate(grayIm,thetaShiftOrig));
+subplot(3,3,5)
+
+subplot(3,3,6)
+plot(shiftedThetaOrig, shiftedRhoOrig,'s','color','black');
+xlim([-90 90])
+ylim([-1000 1000])
+title('Original Image Normalized Hough Transform')
+
+subplot(3,3,7)
+imshow(imrotate(grayIm,thetaShiftOrig));
+subplot(3,3,8)
 imshow(HRot,[],'XData',TRot,'YData', RRot, ...
             'InitialMagnification','fit');
 xlabel('\theta'), ylabel('\rho');
 axis on, axis normal, hold on;
+plot(thetaRot, rhoRot,'s','color','w');
+title('Rotated Image Hough Transform')
 
-% Find peaks in the Hough transform of the image.
-PRot  = houghpeaks(HRot, 100, 'threshold', ceil(0.0*max(HRot(:))));
-thetaRot = TRot(PRot(:,2)); rhoRot = RRot(PRot(:,1));
-plot(thetaRot,rhoRot,'s','color','white');
-hold on
-plot(shiftedTheta,shiftedRho+pi+7*shiftedTheta,'s','color','blue');
+subplot(3,3,9)
+plot(shiftedThetaRot, shiftedRhoRot,'s','color','black');
+xlim([-90 90])
+ylim([-1000 1000])
+title('Rotated Image Normalized Hough Transform')
+
+%{
 plot(theta,rho,'s','color','red');
-
-
+hold on
+plot(shiftedThetaRot, shiftedRhoRot,'s','color','black');
+plot(shiftedThetaOrig, shiftedRhoOrig,'s','color','blue');
+legend('Orginal Image', 'Rotated Image', 'Shifted Original Data', 'Color','k','TextColor','w');
+%}
 %% Create the Hough transform using the binary image.
+%{
 rot_edge_im = imrotate(edgeIm, 90, 'crop');
 [H,T,R] = hough(rot_edge_im);
 imshow(H,[],'XData',T,'YData', R, ...
@@ -90,7 +117,7 @@ for k = 1:length(lines)
    % Plot beginnings and ends of lines
    plot(xy(1,1),xy(1,2),'x','LineWidth',2,'Color','yellow');
    plot(xy(2,1),xy(2,2),'x','LineWidth',2,'Color','red');
-
+   
    % Determine the endpoints of the longest line segment
    len = norm(lines(k).point1 - lines(k).point2);
    if ( len > max_len)
@@ -158,3 +185,4 @@ title('In Place Graph')
 subplot(2,3,6)
 plot(G,'XData',corners(:,1),'YData',-corners(:,2),'EdgeLabel',G.Edges.Weight)
 title('In Place Graph with Weights')
+%}
