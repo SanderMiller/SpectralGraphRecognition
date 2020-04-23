@@ -1,31 +1,74 @@
+%% Load and Crop Image
+clear
 curr_dir = cd;
 data_folder = fullfile(curr_dir, "data");
 addpath(fullfile(curr_dir, "src"));
 [imgs, lbls] = load_imgs_std_sz_lbls(data_folder, "*.jpg", [500, 500]);
 
-%%
+%% Generate Edge Detected Image
+% Load Image and convert to Gray
 rgbIm = squeeze(imgs(1, :, :, :));
-grayIm = rgb2gray(rgbIm);
+grayIm = imrotate(rgb2gray(rgbIm),0);
 
-edgeThresh = 0.7;
-distThresh = 60;
+% Generate Canny Edge Image
+edgeThresh = 0.4;
 edgeIm = edge(grayIm, 'Canny', edgeThresh);
-[Gx,Gy] = imgradientxy(grayIm, 'Sobel');
-[Gmag, Gdir] = imgradient(Gx,Gy);
-corners = detectHarrisFeatures(grayIm, 'FilterSize', 9, 'MinQuality', 0.01);
-corners = corners.selectStrongest(50);
-theta = zeros(1, 50);
-for i = 1:50
-    loc = corners(1).Location;
-    theta(i) = Gdir(int16(loc(1)), int16(loc(2)));
-end
-imshow(grayIm);
-hold on;
-plot(corners)
+
+%% Generate Hough Transform
+%Calculate Hough Transform
+[H,T,R] = hough(edgeIm);
+
+%Plot Hough Curves
+%{
+imshow(H,[],'XData',T,'YData', R, ...
+            'InitialMagnification','fit');
+xlabel('\theta'), ylabel('\rho');
+axis on, axis normal, hold on;
+%}
+% Find peaks in the Hough transform of the image.
+P  = houghpeaks(H, 100, 'threshold', ceil(0.0*max(H(:))));
+theta = T(P(:,2)); rho = R(P(:,1));
+
+%% Determine if Graph needs to be shifted Across a Period
+sortedTheta = sort(theta)
+difference = max(diff(sortedTheta))
+
+span = max(theta)-min(theta)
 
 %%
-% Create the Hough transform using the binary image.
-rot_edge_im = imrotate(edgeIm, 33, 'crop');
+if difference > 180-span
+firstNode = sortedTheta(find(diff(sortedTheta) == difference)+1)
+thetaShift = -90+(difference/2)-firstNode
+shiftedTheta = theta+thetaShift
+wrappedPoints = ones(1,length(shiftedTheta))
+
+
+wrappedPoints = wrappedPoints - (2.*(shiftedTheta()<-90))
+shiftedRho = rho.*wrappedPoints
+shiftedTheta(shiftedTheta<-90) = shiftedTheta(shiftedTheta<-90)+180
+shiftedTheta(shiftedTheta>90) = shiftedTheta(shiftedTheta>90)-180
+end
+%%
+[HRot,TRot,RRot] = hough(imrotate(edgeIm,-thetaShift));
+
+%Plot Hough Curves
+
+imshow(HRot,[],'XData',TRot,'YData', RRot, ...
+            'InitialMagnification','fit');
+xlabel('\theta'), ylabel('\rho');
+axis on, axis normal, hold on;
+
+% Find peaks in the Hough transform of the image.
+PRot  = houghpeaks(HRot, 100, 'threshold', ceil(0.0*max(HRot(:))));
+thetaRot = TRot(PRot(:,2)); rhoRot = RRot(PRot(:,1));
+plot(thetaRot,rhoRot,'s','color','white');
+hold on
+plot(shiftedTheta,shiftedRho+pi+7*shiftedTheta,'s','color','blue');
+plot(theta,rho,'s','color','red');
+
+
+%% Create the Hough transform using the binary image.
+rot_edge_im = imrotate(edgeIm, 90, 'crop');
 [H,T,R] = hough(rot_edge_im);
 imshow(H,[],'XData',T,'YData', R, ...
             'InitialMagnification','fit');
@@ -56,8 +99,21 @@ for k = 1:length(lines)
    end
 end
 
+%% Look for corners
+[Gx,Gy] = imgradientxy(grayIm, 'Sobel');
+[Gmag, Gdir] = imgradient(Gx,Gy);
+corners = detectHarrisFeatures(grayIm, 'FilterSize', 9, 'MinQuality', 0.01);
+corners = corners.selectStrongest(50);
+theta = zeros(1, 50);
+for i = 1:50
+    loc = corners(1).Location;
+    theta(i) = Gdir(int16(loc(1)), int16(loc(2)));
+end
+imshow(grayIm);
+hold on;
+plot(corners)
 
-%%
+%% Create Corner Graph
 D = pdist(corners);
 Dist = squareform(D);
 Dist(Dist>distThresh) = 0;
@@ -102,5 +158,3 @@ title('In Place Graph')
 subplot(2,3,6)
 plot(G,'XData',corners(:,1),'YData',-corners(:,2),'EdgeLabel',G.Edges.Weight)
 title('In Place Graph with Weights')
-
-
