@@ -1,5 +1,5 @@
 figure(1);
-if length(lbls)>3
+if length(lbls)>100
     numImages = 3;
 else
     numImages = length(lbls);
@@ -28,9 +28,13 @@ if i == 1
    title('Expanded Graph')
 end
 subplot(2*length(lbls),4,i*4)
-L = laplacian(G);
-e = eig(L);
-histogram(e, length(unique(e)));
+D = diag(degree(G));
+L = full(laplacian(G));
+D = D.^-.5;
+D(~isfinite(D)) = 0;
+symL = D*L*D;
+e = eig(symL);
+histogram(e, length(e));
 if i == 1
    title('Eigen Values');
 end
