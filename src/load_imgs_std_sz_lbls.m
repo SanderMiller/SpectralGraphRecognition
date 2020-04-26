@@ -25,7 +25,7 @@ for k = 1:num_imgs
     if any(size(img_cell_arr{k}) == img_dims)
         irs = max(img_dims(1) / sz(1), img_dims(2) / sz(2));
         ir = floor(img_dims(1:2) ./ irs);
-        imgs(k, :, :, :) = uint8(imresize(img_cell_arr{k}(1:ir(1), 1:ir(2), :), img_dims(1:2), 'bilinear'));
+        imgs(k, :, :, :) = uint8(imresize(img_cell_arr{k}(1:ir(1), 1:ir(2), :), img_dims(1:2), 'nearest'));
     else
         imgs(k, :, :, :) = uint8(img_cell_arr{k});
     end

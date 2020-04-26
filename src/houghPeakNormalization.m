@@ -1,4 +1,4 @@
-function [shiftedTheta, shiftedRho, thetaShift] = houghPeakNormalization(theta, rho)
+function [normalizedTheta, shiftedRho] = houghPeakNormalization(theta, rho)
 sortedTheta = sort(theta);
 difference = max(diff(sortedTheta));
 span = sortedTheta(end)- sortedTheta(1);
@@ -28,7 +28,14 @@ else %Otherwise, simply center the points around theta = 0
     thetaShift = (span/2)-max(theta);%Calculate the delta theta value
     shiftedTheta = theta + thetaShift;%Shift the theta values
     %Rotate Shifted Values
-    rotationVal = ((deg2rad(abs(thetaShift))+2*pi)*shiftedTheta);
+    
+    % unused?
+    % rotationVal = ((deg2rad(abs(thetaShift))+2*pi)*shiftedTheta);
+    
     shiftedRho = rho+0;
+end
+
+rhoSpan = max(shiftedRho)-min(shiftedRho);
+normalizedTheta = (rhoSpan/2).*(shiftedTheta./90);
 end
 
