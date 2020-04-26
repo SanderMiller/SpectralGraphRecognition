@@ -10,15 +10,15 @@ addpath(fullfile(curr_dir, "src"));
 figure(1);
 for i = 1:2*length(lbls)
 rgbIm = squeeze(imgs(ceil(i/2), :, :, :));
-grayIm = imrotate(rgb2gray(rgbIm),mod(i+1,2)*randi(360,1));
-[G, points] = image2Graph(grayIm, 100, 100);
+grayIm = imrotate(rgb2gray(rgbIm), mod(i+1,2)*randi(360,1));
+[G, normalizedPoints, ~] = image2Graph(grayIm, 100, 100);
 subplot(2*length(lbls),4,i*4-3)
 imshow(grayIm)
 if i == 1
    title('Original Image')
 end
 subplot(2*length(lbls),4,i*4-2)
-p1 = plot(G,'XData',points(:,1),'YData',points(:,2));
+p1 = plot(G,'XData',normalizedPoints(:,1),'YData',normalizedPoints(:,2));
 p1.NodeColor = 'r';
 p1.NodeLabel = [];
 if i == 1
