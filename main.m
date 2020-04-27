@@ -6,7 +6,7 @@ data_folder = fullfile(curr_dir, "data");
 addpath(fullfile(curr_dir, "src"));
 [imgs, lbls] = load_imgs_std_sz_lbls(data_folder, "*.jpg", [500, 500]);
 
-%% Visualizing Graphs With Random Image Rotations
+%% Visualizing Image Graphs and Normalized Eigen Values 
 
 rgbIm = squeeze(imgs(2, :, :, :));
 grayIm = rgb2gray(rgbIm);
