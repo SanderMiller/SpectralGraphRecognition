@@ -7,7 +7,12 @@ addpath(fullfile(curr_dir, "src"));
 [imgs, lbls] = load_imgs_std_sz_lbls(data_folder, "*.jpg", [500, 500]);
 
 %% Visualizing Graphs With Random Image Rotations
+<<<<<<< HEAD
 rgbIm = squeeze(imgs(2, :, :, :));
+=======
+<<<<<<< HEAD
+rgbIm = squeeze(imgs(4, :, :, :));
+>>>>>>> origin
 grayIm = rgb2gray(rgbIm);
 
 [G, points] = image2Graph(grayIm, 100, 100);
