@@ -1,4 +1,4 @@
-function [eigenValues] = getEigenVals(graph)
+function [eigenValues] = getEigenVals(G)
 D = diag(degree(G));
 L = full(laplacian(G));
 D = D.^-.5;
