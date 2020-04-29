@@ -9,3 +9,4 @@ P  = houghpeaks(H, numPeaks, 'threshold', ceil(0.0*max(H(:))));
 
 theta = T(P(:,2)); 
 rho = R(P(:,1));
+end
