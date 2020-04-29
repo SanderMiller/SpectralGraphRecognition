@@ -8,7 +8,7 @@ addpath(fullfile(curr_dir, "src"));
 
 %% Visualizing Image Graphs and Normalized Eigen Values 
 
-rgbIm = squeeze(imgs(4, :, :, :));
+rgbIm = squeeze(imgs(1, :, :, :));
 grayIm = rgb2gray(rgbIm);
 [G, points] = image2Graph(grayIm, 100, 100);
 D = diag(degree(G));
@@ -18,7 +18,7 @@ D(~isfinite(D)) = 0;
 symL = D*L*D;
 e = eig(symL);
 
-rgbIm = squeeze(imgs(4, :, :, :));
+rgbIm = squeeze(imgs(1, :, :, :));
 grayIm2 = imrotate(rgb2gray(rgbIm),47);
 [G2, points2] = image2Graph(grayIm2, 100, 100);
 D2 = diag(degree(G2));
@@ -47,7 +47,7 @@ p3.NodeColor = 'r';
 p3.NodeLabel = [];
 xpos = 0.3; ypos = 0.8;
 distance = norm(e-e2);
-text(xpos, ypos, string(distance))
+text(xpos, ypos, sprintf('Distance: %d',distance))
 
 
 %%
