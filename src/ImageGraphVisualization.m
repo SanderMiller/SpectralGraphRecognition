@@ -1,3 +1,5 @@
+% Script Deprecated
+
 figure(1);
 if length(lbls)>100
     numImages = 3;
