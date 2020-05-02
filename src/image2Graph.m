@@ -6,6 +6,6 @@ function [grph, normalizedPoints, points] = image2Graph(grayImage, maxNodes, dis
     points = [theta', rho'];
     [normalizedTheta, shiftedRho] = houghPeakNormalization(theta, rho);
     normalizedPoints = [normalizedTheta',shiftedRho'];
-    grph = graph(squareform(pdist(normalizedPoints)) < ...
-        distanceThreshold) - eye(length(normalizedPoints));
+    grph = graph((squareform(pdist(normalizedPoints)) < ...
+        distanceThreshold) - eye(length(normalizedPoints)));
 end
