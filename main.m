@@ -42,10 +42,10 @@ for k = 1:lbls_unique_sz(1)
     img_name = matches{1};
     
     validMatchIndices = boolean(zeros(valImgsSz(1), 1));
-    for l = 1:trainImgsSz(1)
-        trainLbl = trainLbls{l};
-        match = regexp(trainLbl, "(" + img_name + ")", 'match');
-        if ~isempty(match)
+    for l = 1:valImgsSz(1)
+        valLbl = valLbls{l};
+        match = regexp(valLbl, "^(?!(ROT))(" + img_name + ")", 'match');
+        if length(match) == 1
             if match{1} == img_name
                 if k == 1
                     numEachValidate = numEachValidate + 1;
@@ -57,7 +57,8 @@ for k = 1:lbls_unique_sz(1)
     end
     validMatchList = find(validMatchIndices);
     assert(length(validMatchList) == numEachValidate, ...
-        'Different numbers of the same corresponding image found in the validation data set')
+        sprintf("Different numbers of the same corresponding image found in the " ...
+        + "validation data set: %d vs %d", numEachValidate, length(validMatchList)))
     validMap(img_name) = validMatchList;
 end
 
