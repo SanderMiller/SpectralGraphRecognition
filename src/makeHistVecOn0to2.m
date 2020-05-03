@@ -1,6 +1,5 @@
 function [histVec] = makeHistVecOn0to2(vec, nBins)
-    %MAKEHISTVECON0TO2 Histogram vector for the eigenvalues of a 
-    %normalized laplacian matrix 
+    %MAKEHISTVECON0TO2 Histogram vector for the eigenvalues of a normalized laplacian matrix
     %   histVec = makeHistVecOn0to2(vec, nBins) returns a vector histVec
     %   containing the number of values in vec in the corresponding bins.
     %   A bin at position k in histVec counts the values in vec on the
