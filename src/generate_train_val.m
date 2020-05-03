@@ -22,12 +22,13 @@ function generate_train_val(data_dir_name, patterns, img_dims, ...
         mkdir(valid_folder);
     end    
     
-    keys = linspace(0, 1, num_imgs);
-    keys = keys(randperm(length(keys)));
+    keys = linspace(0, 1, length(theta_vec)*length(x_trans_vec)*...
+        length(y_trans_vec));
     
     rot_mat = eye(3);
     trans_vec = [0, 0];
     for k = 1:num_imgs
+        keys = keys(randperm(length(keys)));
         img = squeeze(imgs(k, :, :));
         for l = 1:length(theta_vec)
             cos_value = cos(theta_vec(l));
@@ -55,14 +56,14 @@ function generate_train_val(data_dir_name, patterns, img_dims, ...
                         + y_val_str;
                     img_out_name = replace(img_out_name, ".", "_") + ".png";
                     
-                    if keys(k) < train_split
+                    if keys(l+m+n) < train_split
                         prefix = "train";
                     else
                         prefix = "validate";
                     end
                     img_out_filename = fullfile(data_dir_name, prefix, ...
                         img_out_name);
-                    save(img_out_filename, 'img_out')
+                    imwrite(img_out, img_out_filename)
                 end
             end
         end
