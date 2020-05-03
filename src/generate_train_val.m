@@ -30,6 +30,7 @@ function generate_train_val(data_dir_name, patterns, img_dims, ...
     for k = 1:num_imgs
         keys = keys(randperm(length(keys)));
         img = squeeze(imgs(k, :, :));
+        prefix_counter = 1;
         for l = 1:length(theta_vec)
             cos_value = cos(theta_vec(l));
             sin_value = sin(theta_vec(l));
@@ -56,11 +57,13 @@ function generate_train_val(data_dir_name, patterns, img_dims, ...
                         + y_val_str;
                     img_out_name = replace(img_out_name, ".", "_") + ".png";
                     
-                    if keys(l+m+n) < train_split
+                    if keys(prefix_counter) < train_split
                         prefix = "train";
                     else
                         prefix = "validate";
                     end
+                    prefix_counter = prefix_counter + 1;
+                    
                     img_out_filename = fullfile(data_dir_name, prefix, ...
                         img_out_name);
                     imwrite(img_out, img_out_filename)
