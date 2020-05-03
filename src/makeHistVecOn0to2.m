@@ -11,7 +11,7 @@ function [histVec] = makeHistVecOn0to2(vec, nBins)
     assert(max(vec)<=2, "The maximum value of vec cannot exceed 2");
     assert(min(vec)>=0, "The minimum value of vec cannot be less than 0");
 
-    histVec = zeros(nBins, 1);
+    histVec = uint32(zeros(nBins, 1));
     divisor = 1 / nBins;
     for k = 1:length(vec)
         idx = floor((vec(k)/2)/(divisor));
