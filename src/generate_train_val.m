@@ -4,7 +4,7 @@ function generate_train_val(data_dir_name, patterns, img_dims, ...
     %GENERATE_TRAIN_VAL Summary of this function goes here
     %   Detailed explanation goes here
     
-    assert(train_split < 1, '`train_split` must be < 1');
+    assert(train_split < 1 && train_split > 0, '`train_split` must be < 1 and > 0');
     
     [imgs, lbls] = load_imgs_std_sz_lbls(data_dir_name, patterns, img_dims);
     imgs_sz = size(imgs);
@@ -49,7 +49,7 @@ function generate_train_val(data_dir_name, patterns, img_dims, ...
                         boarder_sz, fill_value), trans_vec, rot_mat, fill_value);
                     
                     img_name_pre = lbls{k};
-                    matches = regexpi(img_name_pre, '(?!\.)\w*', 'match');
+                    matches = regexp(img_name_pre, '(?!\.)\w*', 'match');
                     img_name = matches{1};
                     
                     img_out_name = img_name + rot_val_str + x_val_str ...
