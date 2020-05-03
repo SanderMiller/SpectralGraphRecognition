@@ -1,4 +1,4 @@
-function [grph] = image2Graph(grayImage, maxNodes, distanceThreshold)
+function [grph, origPoints] = image2Graph(grayImage, maxNodes, distanceThreshold)
     %IMAGE2GRAPH Summary of this function goes here
     %   Detailed explanation goes here
     
@@ -7,13 +7,13 @@ function [grph] = image2Graph(grayImage, maxNodes, distanceThreshold)
     shiftedTheta = theta-90
     wrappedPoints = ones(1,length(shiftedTheta)); 
     wrappedPoints = wrappedPoints - (2.*((shiftedTheta()<-90))); 
-    shiftedTheta(shifteTheta<-90) = shiftedTheta(shiftedTheta<-90)+180; 
+    shiftedTheta(shiftedTheta<-90) = shiftedTheta(shiftedTheta<-90)+180; 
     shiftedRho = rho.*wrappedPoints;
     shiftedPoints = [shiftedTheta',shiftedRho']
-    dist1 = squareForm(pdist(origPoints))
-    dist2 = squareForm(pdist(shiftedPoints))
+    dist1 = squareform(pdist(origPoints))
+    dist2 = squareform(pdist(shiftedPoints))
     shortestDist = min(dist1,dist2)
-    grph = graph(shortestDist < ...
-        distanceThreshold) - eye(length(normalizedPoints));
+    grph = graph((shortestDist < ...
+        distanceThreshold) - eye(length(shiftedPoints)));
 
 end
