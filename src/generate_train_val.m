@@ -1,5 +1,6 @@
 function generate_train_val(data_dir_name, patterns, img_dims, ...
-    train_split, theta_vec, x_trans_vec, y_trans_vec, fill_value)
+    train_split, theta_vec, x_trans_vec, y_trans_vec, fill_value, ...
+    boarder_sz)
     %GENERATE_TRAIN_VAL Summary of this function goes here
     %   Detailed explanation goes here
     
@@ -43,8 +44,8 @@ function generate_train_val(data_dir_name, patterns, img_dims, ...
                     trans_vec(2) = y_trans_vec(n);
                     y_val_str = sprintf("Y%0.6f", y_trans_vec(n));
                     
-                    img_out = apply_rot_trans_img(img, trans_vec, ...
-                        rot_mat, fill_value);
+                    img_out = apply_rot_trans_img(add_img_boarder(img, ...
+                        boarder_sz, fill_value), trans_vec, rot_mat, fill_value);
                     
                     img_name_pre = lbls{k};
                     matches = regexpi(img_name_pre, '(?!\.)\w*', 'match');
