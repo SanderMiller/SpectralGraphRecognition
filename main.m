@@ -37,8 +37,8 @@ confuseMtx = zeros(numUnique, numUnique);
 lblsUniqueNoExtension = cell(length(lblsUnique), 1);
 for k = 1:numUnique
     matches = regexpi(lblsUnique{k}, '(?!\.)\w*', 'match');
-    if ~(length(matches) == 1)
-        error("There was an error witht the filename in lblsUnique");
+    if ~(length(matches) == 2)
+        error("There was an error with the filename in lbls_unique");
     end
     lblsUniqueNoExtension{k} = matches{1};
 end
