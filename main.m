@@ -1,10 +1,10 @@
 dataFolder = "data";
-addpath(fullfile(cd, "src"));
+addpath(genpath(fullfile(cd, "src")));
 
 [validImgs, validLbls] = loadImgsLblsStdSz(fullfile(dataFolder, ...
-    'validate'),"*.png", [100, 100]);
+    'validate'), "*.png", [100, 100]);
 [trainImgs, trainLbls] = loadImgsLblsStdSz(fullfile(dataFolder, ...
-    'train'),"*.png", [100, 100]);
+    'train'), "*.png", [100, 100]);
 
 numPeaks = 100;
 
