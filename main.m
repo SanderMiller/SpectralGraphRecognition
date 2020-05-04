@@ -29,8 +29,7 @@ for a = 1:validImgsSz(1)
 end
 
 % load source image labels
-[~, lblsUnique] = loadImgsLblsStdSz(dataFolder, {'*.png', ...
-    '*.jpg'}, [200, 200]);
+[~, lblsUnique] = loadImgsLblsStdSz(dataFolder, {'*.png', '*.jpg'}, [200, 200]);
 numOrigImgs = length(lblsUnique);
 
 origLblsMap = containers.Map();
@@ -55,6 +54,7 @@ end
 
 % plot confusion matrix
 figure('Name', 'Confusion Matrix');
-cm = confusionchart(confuseMtx, origLbls, 'RowSummary','row-normalized','ColumnSummary','column-normalized');
+cm = confusionchart(confuseMtx, origLbls, 'RowSummary', 'row-normalized', ...
+    'ColumnSummary','column-normalized');
 title('Confusion Matrix');
 sortClasses(cm,'descending-diagonal')
