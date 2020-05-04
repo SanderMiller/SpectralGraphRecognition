@@ -44,7 +44,7 @@ end
 confuseMtx = uint32(zeros(numOrigImgs, numOrigImgs));
 for l = 1:validImgsSz(1)
     pred = makePred(squeeze(histMatrixValid(l, :)), histMatrixTrain, ...
-        trainLbls);
+        trainLbls, 'linear');
     predIdx = origLblsMap(pred);
     validLblName = extractTrainValName(validLbls(l));
     disp("Truth: " + validLblName + " -> Pred: " + pred);
