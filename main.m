@@ -1,13 +1,11 @@
-%% Load and Crop Image
-clear;
-clear fig;
-curr_dir = cd;
 data_folder = "data";
-addpath(fullfile(curr_dir, "src"));
-[valImgs, valLbls] = load_imgs_std_sz_lbls(fullfile(data_folder, 'validate'),"*.png", [100, 100]);
+addpath(fullfile(cd, "src"));
 
-%% Visualizing Image Graphs and Normalized Eigen Values 
-[trainImgs, trainLbls] = load_imgs_std_sz_lbls(fullfile(data_folder, 'train'),"*.png", [100, 100]);
+[valImgs, valLbls] = load_imgs_std_sz_lbls(fullfile(data_folder, ...
+    'validate'),"*.png", [100, 100]);
+[trainImgs, trainLbls] = load_imgs_std_sz_lbls(fullfile(data_folder, ...
+    'train'),"*.png", [100, 100]);
+
 numPeaks = 100;
 
 % load training images & labels
@@ -87,6 +85,7 @@ for m = 1:2
     end
     maps_cell{m} = map;
 end
+
 
 % for k = 1:num_unique
 %     img_name_pre = lbls_unique{k};
