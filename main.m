@@ -1,7 +1,7 @@
 dataFolder = "data";
 addpath(fullfile(cd, "src"));
 
-[valImgs, valLbls] = loadImgsLblsStdSz(fullfile(dataFolder, ...
+[validImgs, validLbls] = loadImgsLblsStdSz(fullfile(dataFolder, ...
     'validate'),"*.png", [100, 100]);
 [trainImgs, trainLbls] = loadImgsLblsStdSz(fullfile(dataFolder, ...
     'train'),"*.png", [100, 100]);
@@ -10,78 +10,51 @@ numPeaks = 100;
 
 % load training images & labels
 trainImgsSz = size(trainImgs);
-histogramMatrixTrain = uint32(zeros(trainImgsSz(1),20));
+histMatrixTrain = uint32(zeros(trainImgsSz(1),20));
 for a = 1:trainImgsSz(1)
   grayIm = squeeze(trainImgs(a, :, :));  
   [G, points] = image2Graph(grayIm,numPeaks,20);
   currHistVec = makeHistVecOn0to2(getEigenVals(G),20);
-  histogramMatrixTrain(a, :) = currHistVec;
+  histMatrixTrain(a, :) = currHistVec;
 end
 
 % load test images & labels
-valImgsSz = size(valImgs);
-histogramMatrixTest = uint32(zeros(valImgsSz(1),20));
-for a = 1:valImgsSz(1)
-  grayIm = squeeze(valImgs(a, :, :));  
+validImgsSz = size(validImgs);
+histMatrixValid = uint32(zeros(validImgsSz(1),20));
+for a = 1:validImgsSz(1)
+  grayIm = squeeze(validImgs(a, :, :));  
   [G, points] = image2Graph(grayIm, numPeaks, 20);
   currHistVec = makeHistVecOn0to2(getEigenVals(G), 20);
-  histogramMatrixTest(a, :) = currHistVec;
+  histMatrixValid(a, :) = currHistVec;
 end
 
 % load source image labels
 [~, lblsUnique] = loadImgsLblsStdSz(dataFolder, {'*.png', ...
     '*.jpg'}, [200, 200]);
-numUnique = length(lblsUnique);
-confuseMtx = zeros(numUnique, numUnique);
+numOrigImgs = length(lblsUnique);
 
-lblsUniqueNoExtension = cell(length(lblsUnique), 1);
-for k = 1:numUnique
-    matches = regexpi(lblsUnique{k}, '(?!\.)\w*', 'match');
-    if ~(length(matches) == 2)
-        error("There was an error with the filename in lbls_unique");
-    end
-    lblsUniqueNoExtension{k} = matches{1};
+origLblsMap = containers.Map();
+origLbls = cell(length(lblsUnique), 1);
+for k = 1:numOrigImgs
+    fileNoExtension = removeFileExtension(lblsUnique{k});
+    origLbls{k} = fileNoExtension;
+    origLblsMap(fileNoExtension) = k;
 end
 
-% match source image labels to 
-mapsCell = cell(2, 1);
-for m = 1:2
-    numEach = 0;
-    map = containers.Map();
-    trainMap = containers.Map();
-    for k = 1:numUnique
-        imgName = lblsUniqueNoExtension{k};
-        
-        if m == 1
-            lLength = valImgsSz(1);
-        else
-            lLength = trainImgsSz(1);
-        end
-        validMatchIndices = boolean(zeros(lLength, 1));
-        
-        for l = 1:lLength
-            if m == 1
-                lbl = valLbls{l};
-            else
-                lbl = trainLbls{l};
-            end
-            match = regexp(lbl, "^(?!(ROT))(" + imgName + ")", 'match');
-            
-            if ~isempty(match)
-                if match{1} == imgName
-                    if k == 1
-                        numEach = numEach + 1;
-                    end
-                    validMatchIndices(l) = 1;  % store l value
-                end
-            end
-        end
-        validMatchList = find(validMatchIndices);
-        assert(length(validMatchList) == numEach, ...
-            sprintf("Different numbers of the same corresponding image " + ...
-            "found in the validation data set: %d vs %d", numEach, ...
-            length(validMatchList)))
-        map(imgName) = validMatchList;
-    end
-    mapsCell{m} = map;
+% generate confusion matrix
+confuseMtx = uint32(zeros(numOrigImgs, numOrigImgs));
+for l = 1:validImgsSz(1)
+    pred = makePred(squeeze(histMatrixValid(l, :)), histMatrixTrain, ...
+        trainLbls);
+    predIdx = origLblsMap(pred);
+    validLblName = extractTrainValName(validLbls(l));
+    disp("Truth: " + validLblName + " -> Pred: " + pred);
+    lIdx = origLblsMap(validLblName);
+    confuseMtx(lIdx, predIdx) = confuseMtx(lIdx, predIdx) + 1;
 end
+
+% plot confusion matrix
+figure('Name', 'Confusion Matrix');
+cm = confusionchart(confuseMtx, origLbls, 'RowSummary','row-normalized','ColumnSummary','column-normalized');
+title('Confusion Matrix');
+sortClasses(cm,'descending-diagonal')
