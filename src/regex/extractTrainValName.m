@@ -5,5 +5,6 @@ function fileName = extractTrainValName(fileNameWithInfo)
     if length(result) > 1
         error("More than one result was returned");
     end
-    fileName = result{1}{1};
+    fileName = result{1}{1};  % TODO: understand why the result needs to
+    % be indexed twice
 end
