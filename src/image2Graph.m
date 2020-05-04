@@ -4,16 +4,16 @@ function [grph, origPoints] = image2Graph(grayImage, maxNodes, distanceThreshold
     
     [theta, rho] = image2HoughPeaks(grayImage, 0.4, maxNodes);
     origPoints = [theta', rho'];
-    shiftedTheta = theta-90;
-    wrappedPoints = ones(1,length(shiftedTheta)); 
+    shiftedTheta = theta - 90;
+    wrappedPoints = ones(1, length(shiftedTheta)); 
     wrappedPoints = wrappedPoints - (2.*((shiftedTheta()<-90))); 
-    shiftedTheta(shiftedTheta<-90) = shiftedTheta(shiftedTheta<-90)+180; 
+    shiftedTheta(shiftedTheta < -90) = shiftedTheta(shiftedTheta < -90) + 180; 
     shiftedRho = rho.*wrappedPoints;
-    shiftedPoints = [shiftedTheta',shiftedRho'];
+    shiftedPoints = [shiftedTheta', shiftedRho'];
     dist1 = squareform(pdist(origPoints));
     dist2 = squareform(pdist(shiftedPoints));
-    shortestDist = min(dist1,dist2);
-    grph = graph((shortestDist < ...
-        distanceThreshold) - eye(length(shiftedPoints)));
+    shortestDist = min(dist1, dist2);
+    grph = graph((shortestDist < distanceThreshold) - ...
+        eye(length(shiftedPoints)));
 
 end

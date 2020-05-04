@@ -1,9 +1,9 @@
-data_folder = "data";
+dataFolder = "data";
 addpath(fullfile(cd, "src"));
 
-[valImgs, valLbls] = load_imgs_std_sz_lbls(fullfile(data_folder, ...
+[valImgs, valLbls] = loadImgsLblsStdSz(fullfile(dataFolder, ...
     'validate'),"*.png", [100, 100]);
-[trainImgs, trainLbls] = load_imgs_std_sz_lbls(fullfile(data_folder, ...
+[trainImgs, trainLbls] = loadImgsLblsStdSz(fullfile(dataFolder, ...
     'train'),"*.png", [100, 100]);
 
 numPeaks = 100;
@@ -13,9 +13,9 @@ trainImgsSz = size(trainImgs);
 histogramMatrixTrain = uint32(zeros(trainImgsSz(1),20));
 for a = 1:trainImgsSz(1)
   grayIm = squeeze(trainImgs(a, :, :));  
-  [G,points] = image2Graph(grayIm,numPeaks,20);
+  [G, points] = image2Graph(grayIm,numPeaks,20);
   currHistVec = makeHistVecOn0to2(getEigenVals(G),20);
-  histogramMatrixTrain(a,:) = currHistVec;
+  histogramMatrixTrain(a, :) = currHistVec;
 end
 
 % load test images & labels
@@ -23,52 +23,52 @@ valImgsSz = size(valImgs);
 histogramMatrixTest = uint32(zeros(valImgsSz(1),20));
 for a = 1:valImgsSz(1)
   grayIm = squeeze(valImgs(a, :, :));  
-  [G,points] = image2Graph(grayIm,numPeaks,20);
-  currHistVec = makeHistVecOn0to2(getEigenVals(G),20);
-  histogramMatrixTest(a,:) = currHistVec;
+  [G, points] = image2Graph(grayIm, numPeaks, 20);
+  currHistVec = makeHistVecOn0to2(getEigenVals(G), 20);
+  histogramMatrixTest(a, :) = currHistVec;
 end
 
 % load source image labels
-[~, lbls_unique] = load_imgs_std_sz_lbls(data_folder, {'*.png', ...
+[~, lblsUnique] = loadImgsLblsStdSz(dataFolder, {'*.png', ...
     '*.jpg'}, [200, 200]);
-num_unique = length(lbls_unique);
-confuseMtx = zeros(num_unique, num_unique);
+numUnique = length(lblsUnique);
+confuseMtx = zeros(numUnique, numUnique);
 
-lbls_unique_no_extension = cell(length(lbls_unique), 1);
-for k = 1:num_unique
-    matches = regexpi(lbls_unique{k}, '(?!\.)\w*', 'match');
+lblsUniqueNoExtension = cell(length(lblsUnique), 1);
+for k = 1:numUnique
+    matches = regexpi(lblsUnique{k}, '(?!\.)\w*', 'match');
     if ~(length(matches) == 1)
-        error("There was an error witht the filename in lbls_unique");
+        error("There was an error witht the filename in lblsUnique");
     end
-    lbls_unique_no_extension{k} = matches{1};
+    lblsUniqueNoExtension{k} = matches{1};
 end
 
 % match source image labels to 
-maps_cell = cell(2, 1);
+mapsCell = cell(2, 1);
 for m = 1:2
     numEach = 0;
     map = containers.Map();
     trainMap = containers.Map();
-    for k = 1:num_unique
-        img_name = lbls_unique_no_extension{k};
+    for k = 1:numUnique
+        imgName = lblsUniqueNoExtension{k};
         
         if m == 1
-            l_length = valImgsSz(1);
+            lLength = valImgsSz(1);
         else
-            l_length = trainImgsSz(1);
+            lLength = trainImgsSz(1);
         end
-        validMatchIndices = boolean(zeros(l_length, 1));
+        validMatchIndices = boolean(zeros(lLength, 1));
         
-        for l = 1:l_length
+        for l = 1:lLength
             if m == 1
                 lbl = valLbls{l};
             else
                 lbl = trainLbls{l};
             end
-            match = regexp(lbl, "^(?!(ROT))(" + img_name + ")", 'match');
+            match = regexp(lbl, "^(?!(ROT))(" + imgName + ")", 'match');
             
             if ~isempty(match)
-                if match{1} == img_name
+                if match{1} == imgName
                     if k == 1
                         numEach = numEach + 1;
                     end
@@ -81,24 +81,7 @@ for m = 1:2
             sprintf("Different numbers of the same corresponding image " + ...
             "found in the validation data set: %d vs %d", numEach, ...
             length(validMatchList)))
-        map(img_name) = validMatchList;
+        map(imgName) = validMatchList;
     end
-    maps_cell{m} = map;
+    mapsCell{m} = map;
 end
-
-
-% for k = 1:num_unique
-%     img_name_pre = lbls_unique{k};
-%     matches = regexpi(img_name_pre, '(?!\.)\w*', 'match');
-%     img_name = matches{1};
-%     
-%     for l = 1:valImgsSz(1)
-%         valLbl = valLbls{k};
-%         match = regexp(trainLbl, '(' + lbl + ')', 'match');
-%         if match == img_name
-%             
-%         end
-%     end
-% end
-
-
