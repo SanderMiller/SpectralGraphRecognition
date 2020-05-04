@@ -37,7 +37,7 @@ function generateTrainVal(dataDirName, patterns, desiredImgDims, ...
             rotMat(1, 2) = -sinValue;
             rotMat(2, 1) = sinValue;
             rotMat(2, 2) = cosValue;
-            rotValStr = sprintf("ROT%0.6f", thetaVec(l));
+            rotValStr = sprintf("#ROT%0.6f", thetaVec(l));
             for m = 1:length(xTransVec)
                 transVec(1) = xTransVec(m);
                 xValStr = sprintf("X%0.6f", xTransVec(m));
