@@ -1,37 +1,46 @@
+%% Generate data
+% generateTrainVal("data", {'*.jpg', '*.png'}, [500, 500], 0.8, ...
+%     linspace(-pi, pi, 10), linspace(-3, 3, 5), linspace(-3, 3, 5), ...
+%     255, 100, 1)
+
 %% Load and pre-process data
 
+% handle paths
 dataFolder = "data";
 addpath(genpath(fullfile(cd, "src")));
 
-[validImgs, validLbls] = loadImgsLblsStdSz(fullfile(dataFolder, ...
-    'validate'), "*.png", [100, 100]);
-[trainImgs, trainLbls] = loadImgsLblsStdSz(fullfile(dataFolder, ...
-    'train'), "*.png", [100, 100]);
+% parameters
+desiredImgDims = [100, 100];
+numPeaks = 50;
+nBins = 20;
 
-numPeaks = 100;
+% load training and validation datasets
+[validImgs, validLbls] = loadImgsLblsStdSz(fullfile(dataFolder, ...
+    'validate'), "*.png", desiredImgDims);
+[trainImgs, trainLbls] = loadImgsLblsStdSz(fullfile(dataFolder, ...
+    'train'), "*.png", desiredImgDims);
 
 % load training images & labels
 trainImgsSz = size(trainImgs);
-histMatrixTrain = uint32(zeros(trainImgsSz(1),20));
+histMatrixTrain = uint32(zeros(trainImgsSz(1), nBins));
 for a = 1:trainImgsSz(1)
-  grayIm = squeeze(trainImgs(a, :, :));  
-  [G, points] = image2Graph(grayIm,numPeaks,20);
-  currHistVec = makeHistVecOn0to2(getEigenVals(G),20);
+  [G, points] = image2Graph(squeeze(trainImgs(a, :, :)), numPeaks, nBins);
+  currHistVec = makeHistVecOn0to2(getEigenVals(G), nBins);
   histMatrixTrain(a, :) = currHistVec;
 end
 
 % load test images & labels
 validImgsSz = size(validImgs);
-histMatrixValid = uint32(zeros(validImgsSz(1),20));
+histMatrixValid = uint32(zeros(validImgsSz(1),nBins));
 for a = 1:validImgsSz(1)
-  grayIm = squeeze(validImgs(a, :, :));  
-  [G, points] = image2Graph(grayIm, numPeaks, 20);
-  currHistVec = makeHistVecOn0to2(getEigenVals(G), 20);
+  [G, points] = image2Graph(squeeze(validImgs(a, :, :)), numPeaks, nBins);
+  currHistVec = makeHistVecOn0to2(getEigenVals(G), nBins);
   histMatrixValid(a, :) = currHistVec;
 end
 
 % load source image labels
-[~, lblsOrig] = loadImgsLblsStdSz(dataFolder, {'*.png', '*.jpg'}, [200, 200]);
+[~, lblsOrig] = loadImgsLblsStdSz(dataFolder, {'*.png', '*.jpg'}, ...
+    desiredImgDims);
 numOrigImgs = length(lblsOrig);
 
 origLblsMap = containers.Map();
@@ -87,10 +96,7 @@ end
 
 %% Run Algorithm
 
-
 % Generate confusion matrix using linear search
-
-% generate confusion matrix
 confuseMtxLinearSearch = uint32(zeros(numOrigImgs, numOrigImgs));
 for l = 1:validImgsSz(1)
     pred = makePredLinSearch(squeeze(histMatrixValid(l, :)), ... 
@@ -110,9 +116,7 @@ cmLinear = confusionchart(confuseMtxLinearSearch, origLbls, ...
 title('Confusion Matrix with Linear Search');
 sortClasses(cmLinear,'descending-diagonal')
 
-
 % Generate confusion matrix using simulated annealing
-
 confuseMtxSimAnnealSearch = uint32(zeros(numOrigImgs, numOrigImgs));
 for l = 1:validImgsSz(1)
     pred = makePredSimAnnealSearch(squeeze(histMatrixValid(l, :)), ... 
@@ -130,4 +134,3 @@ cmSimAnneal = confusionchart(confuseMtxSimAnnealSearch, origLbls, ...
     'RowSummary', 'row-normalized', 'ColumnSummary', 'column-normalized');
 title('Confusion Matrix with Simulated Annealing Search');
 sortClasses(cmSimAnneal,'descending-diagonal')
-
