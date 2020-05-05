@@ -54,7 +54,7 @@ function [imgs, lbls] = loadImgsLblsStdSz(dataDirName, patterns, desiredImgDims)
             % crop & resize image to prescribed dimensions
             irs = max(desiredImgDims(1) / sz(1), desiredImgDims(2) / sz(2));
             ir = floor(desiredImgDims(1:2) ./ irs);
-            imgs(k, :, :, :) = uint8(imresize(imgCellArr{k}(1:ir(1), 1:ir(2), :), desiredImgDims(1:2), 'nearest'));
+            imgs(k, :, :, :) = uint8(imresize(imgCellArr{k}(1:ir(1), 1:ir(2), :), desiredImgDims(1:2), 'bilinear'));
         else
             imgs(k, :, :, :) = uint8(imgCellArr{k});
         end
