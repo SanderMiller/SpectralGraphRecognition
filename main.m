@@ -1,11 +1,13 @@
 %% Generate data
+% handle paths
+dataFolder = "data";
+addpath(genpath(fullfile(cd, "src")));
+
 generateTrainVal("data", {'*.jpg', '*.png'}, [500, 500], 0.8, ...
     linspace(-pi, pi, 10), linspace(-3, 3, 5), linspace(-3, 3, 5), ...
     255, 100, 1)
 
 %% Load and pre-process data
-
-
 
 % parameters
 desiredImgDims = [100, 100];
@@ -58,14 +60,14 @@ for m = 1:2
     trainMap = containers.Map();
     for k = 1:numOrigImgs
         imgName = removeFileExtension(lblsOrig{k});
-        
+
         if m == 1
             lLength = validImgsSz(1);
         else
             lLength = trainImgsSz(1);
         end
-        validMatchIndices = boolean(zeros(lLength, 1));
-        
+        matchIndices = boolean(zeros(lLength, 1));
+
         for l = 1:lLength
             if m == 1
                 lbl = validLbls{l};
@@ -74,17 +76,17 @@ for m = 1:2
             end
             % TODO: Improve regex for robustness
             match = regexp(lbl, "^(?!(ROT))(" + imgName + ")", 'match');
-            
+
             if ~isempty(match)
                 if match{1} == imgName
                     if k == 1
                         numEach = numEach + 1;
                     end
-                    validMatchIndices(l) = 1;  % store l value
+                    matchIndices(l) = 1;  % store l value
                 end
             end
         end
-        matchList = find(validMatchIndices);
+        matchList = find(matchIndices);
         assert(length(matchList) == numEach, ...
             sprintf("Different numbers of the same corresponding image " + ...
             "found in the validation data set: %d vs %d", numEach, ...
@@ -99,7 +101,7 @@ end
 % Generate confusion matrix using linear search
 confuseMtxLinearSearch = uint32(zeros(numOrigImgs, numOrigImgs));
 for l = 1:validImgsSz(1)
-    pred = makePredLinSearch(squeeze(histMatrixValid(l, :)), ... 
+    pred = makePredLinSearch(squeeze(histMatrixValid(l, :)), ...
         histMatrixTrain, trainLbls);
     predIdx = origLblsMap(pred);
     validLblName = extractTrainValName(validLbls(l));
@@ -119,7 +121,7 @@ sortClasses(cmLinear,'descending-diagonal')
 % Generate confusion matrix using simulated annealing
 confuseMtxSimAnnealSearch = uint32(zeros(numOrigImgs, numOrigImgs));
 for l = 1:validImgsSz(1)
-    pred = makePredSimAnnealSearch(squeeze(histMatrixValid(l, :)), ... 
+    pred = makePredSimAnnealSearch(squeeze(histMatrixValid(l, :)), ...
         histMatrixTrain, trainLbls, simAnnealMaxIter, simAnnealTInit, nbhMapsCell{2});
     predIdx = origLblsMap(pred);
     validLblName = extractTrainValName(validLbls(l));
