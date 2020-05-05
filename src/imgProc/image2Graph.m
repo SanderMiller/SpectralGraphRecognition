@@ -10,8 +10,8 @@ function [grph, origPoints] = image2Graph(grayImage, maxNodes, distanceThreshold
     shiftedTheta(shiftedTheta < -90) = shiftedTheta(shiftedTheta < -90) + 180; 
     shiftedRho = rho.*wrappedPoints;
     shiftedPoints = [shiftedTheta', shiftedRho'];
-    dist1 = squareform(pdist(origPoints));
-    dist2 = squareform(pdist(shiftedPoints));
+    dist1 = squareform(pdist(origPoints, 'cityblock'));
+    dist2 = squareform(pdist(shiftedPoints, 'cityblock'));
     shortestDist = min(dist1, dist2);
     grph = graph((shortestDist < distanceThreshold) - ...
         eye(length(shiftedPoints)));
