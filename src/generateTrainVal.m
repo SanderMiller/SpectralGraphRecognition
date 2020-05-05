@@ -1,5 +1,6 @@
 function generateTrainVal(dataDirName, patterns, desiredImgDims, ...
-    trainSplit, thetaVec, xTransVec, yTransVec, fillValue, boarderSz)
+    trainSplit, thetaVec, xTransVec, yTransVec, fillValue, boarderSz, ...
+    deleteExist)
     %GENERATETRAINVAL Summary of this function goes here
     %   Detailed explanation goes here
     
@@ -13,13 +14,19 @@ function generateTrainVal(dataDirName, patterns, desiredImgDims, ...
     trainFolder = fullfile('data', 'train');
     if ~(exist(trainFolder, 'dir') == 7)
         mkdir(trainFolder);
+    elseif deleteExist
+        rmdir(trainFolder, 's');
+        mkdir(trainFolder);
     end
     
     % create validate folder if needed
     validFolder = fullfile('data', 'validate');
     if ~(exist(validFolder, 'dir') == 7)
         mkdir(validFolder);
-    end    
+    elseif deleteExist
+        rmdir(validFolder, 's');
+        mkdir(validFolder);
+    end
     
     keys = linspace(0, 1, length(thetaVec)*length(xTransVec)*...
         length(yTransVec));
@@ -37,21 +44,18 @@ function generateTrainVal(dataDirName, patterns, desiredImgDims, ...
             rotMat(1, 2) = -sinValue;
             rotMat(2, 1) = sinValue;
             rotMat(2, 2) = cosValue;
-            rotValStr = sprintf("#ROT%0.6f", thetaVec(l));
+            rotValStr = sprintf("#ROT=%0.6f", thetaVec(l));
             for m = 1:length(xTransVec)
                 transVec(1) = xTransVec(m);
-                xValStr = sprintf("X%0.6f", xTransVec(m));
+                xValStr = sprintf("#X=%0.6f", xTransVec(m));
                 for n = 1:length(yTransVec)
                     transVec(2) = yTransVec(n);
-                    yValStr = sprintf("Y%0.6f", yTransVec(n));
+                    yValStr = sprintf("#Y=%0.6f", yTransVec(n));
                     
                     imgOut = applyRotTrans(addImgBoarder(img, ...
                         boarderSz, fillValue), transVec, rotMat, fillValue);
                     
-                    imgNamePre = lbls{k};
-                    matches = regexp(imgNamePre, '(?!\.)\w*', 'match');
-                    imgName = matches{1};
-                    
+                    imgName = removeFileExtension(lbls{k});
                     imgOutName = imgName + rotValStr + xValStr + yValStr;
                     imgOutName = replace(imgOutName, ".", "_") + ".png";
                     
