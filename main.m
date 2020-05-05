@@ -13,6 +13,8 @@ addpath(genpath(fullfile(cd, "src")));
 desiredImgDims = [100, 100];
 numPeaks = 50;
 nBins = 20;
+simAnnealMaxIter = 60;
+simAnnealTInit = 10;
 
 % load training and validation datasets
 [validImgs, validLbls] = loadImgsLblsStdSz(fullfile(dataFolder, ...
@@ -42,7 +44,6 @@ end
 [~, lblsOrig] = loadImgsLblsStdSz(dataFolder, {'*.png', '*.jpg'}, ...
     desiredImgDims);
 numOrigImgs = length(lblsOrig);
-
 origLblsMap = containers.Map();
 origLbls = cell(length(lblsOrig), 1);
 for k = 1:numOrigImgs
@@ -51,7 +52,7 @@ for k = 1:numOrigImgs
     origLblsMap(fileNoExtension) = k;
 end
 
-% match source image labels to 
+% create map object for the simulated annealing algorithm
 nbhMapsCell = cell(2, 1);  % 1st -> validate; 2nd -> train
 for m = 1:2
     numEach = 0;
@@ -120,7 +121,7 @@ sortClasses(cmLinear,'descending-diagonal')
 confuseMtxSimAnnealSearch = uint32(zeros(numOrigImgs, numOrigImgs));
 for l = 1:validImgsSz(1)
     pred = makePredSimAnnealSearch(squeeze(histMatrixValid(l, :)), ... 
-        histMatrixTrain, trainLbls, 60, 10, nbhMapsCell{2});
+        histMatrixTrain, trainLbls, simAnnealMaxIter, simAnnealTInit, nbhMapsCell{2});
     predIdx = origLblsMap(pred);
     validLblName = extractTrainValName(validLbls(l));
     disp("Truth: " + validLblName + " -> Pred: " + pred);
@@ -132,5 +133,5 @@ end
 subplot(1, 2, 2);
 cmSimAnneal = confusionchart(confuseMtxSimAnnealSearch, origLbls, ...
     'RowSummary', 'row-normalized', 'ColumnSummary', 'column-normalized');
-title('Confusion Matrix with Simulated Annealing Search');
-sortClasses(cmSimAnneal,'descending-diagonal')
+title("Confusion Matrix with Simulated Annealing Search");
+sortClasses(cmSimAnneal, 'descending-diagonal')
