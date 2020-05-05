@@ -76,8 +76,7 @@ for m = 1:2
             end
             % TODO: Improve regex for robustness on filenames with matching
             % sub-strings at beginning
-            match = regexp(lbl, "^(?!(ROT))(" + imgName + ")", 'match');
-
+            match = regexp(lbl, "^(" + imgName + "(?=#ROT))", 'match');
             if ~isempty(match)
                 if match{1} == imgName
                     if k == 1
