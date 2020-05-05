@@ -74,7 +74,8 @@ for m = 1:2
             else
                 lbl = trainLbls{l};
             end
-            % TODO: Improve regex for robustness
+            % TODO: Improve regex for robustness on filenames with matching
+            % sub-strings at beginning
             match = regexp(lbl, "^(?!(ROT))(" + imgName + ")", 'match');
 
             if ~isempty(match)
