@@ -3,18 +3,19 @@
 dataFolder = "data";
 addpath(genpath(fullfile(cd, "src")));
 
-generateTrainVal("data", {'*.jpg', '*.png'}, [500, 500], 0.8, ...
-    linspace(-pi, pi, 10), linspace(-3, 3, 5), linspace(-3, 3, 5), ...
-    255, 100, 1)
+% generateTrainVal("data", {'*.jpg', '*.png'}, [386, 500], 0.8, ...
+%     linspace(-pi, pi, 5), linspace(-70, 70, 5), linspace(-70, 70, 5), ...
+%     0, 100, 1)
 
 %% Load and pre-process data
 
 % parameters
-desiredImgDims = [100, 100];
-numPeaks = 50;
-nBins = 20;
+desiredImgDims = [300, 232];
+numPeaks = 100;
+nBins = 40;
 simAnnealMaxIter = 60;
 simAnnealTInit = 10;
+distance_threshold = norm(desiredImgDims) / 5;
 
 % load training and validation datasets
 [validImgs, validLbls] = loadImgsLblsStdSz(fullfile(dataFolder, ...
@@ -26,7 +27,8 @@ simAnnealTInit = 10;
 trainImgsSz = size(trainImgs);
 histMatrixTrain = uint32(zeros(trainImgsSz(1), nBins));
 for a = 1:trainImgsSz(1)
-  [G, points] = image2Graph(squeeze(trainImgs(a, :, :)), numPeaks, nBins);
+  [G, points] = image2Graph(squeeze(trainImgs(a, :, :)), numPeaks, ...
+      distance_threshold);
   currHistVec = makeHistVecOn0to2(getEigenVals(G), nBins);
   histMatrixTrain(a, :) = currHistVec;
 end
@@ -35,7 +37,8 @@ end
 validImgsSz = size(validImgs);
 histMatrixValid = uint32(zeros(validImgsSz(1),nBins));
 for a = 1:validImgsSz(1)
-  [G, points] = image2Graph(squeeze(validImgs(a, :, :)), numPeaks, nBins);
+  [G, points] = image2Graph(squeeze(validImgs(a, :, :)), numPeaks, ...
+      distance_threshold);
   currHistVec = makeHistVecOn0to2(getEigenVals(G), nBins);
   histMatrixValid(a, :) = currHistVec;
 end

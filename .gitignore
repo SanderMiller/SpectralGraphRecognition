@@ -31,5 +31,6 @@ octave-workspace
 # End of https://www.gitignore.io/api/matlab
 
 ### SPECIFIC TO THIS PROJECT ###
-data/
+data/validate
+data/train
 results_unpublished/
