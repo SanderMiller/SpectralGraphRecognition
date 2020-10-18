@@ -1,5 +1,5 @@
 # SpectralGraphRecognition
-Data Structures and Algorithms Project: Classification of Objects using Graph SpectraEmbeddings derived from Hough Space
+Data Structures and Algorithms Project: Classification of Objects using Graph Spectra Embeddings derived from Hough Space
 
 ## Abstract
 
