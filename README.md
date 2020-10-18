@@ -11,9 +11,17 @@ The performance of our algorithm - along with a complete description of our impl
 
 ## Usage
 
-Using MATLAB, run the `main.m` script to generate the training and test data from the source images in the `data/` directory, perform the pre-processing, and generate confusion matrices for both simulated annealing and linear search.
+This project is written for MATLAB. Run the `main.m` script to generate the training and test data from the source images in the `data/` directory, perform the pre-processing, and generate confusion matrices for both simulated annealing and linear search.
 
 An interactive app, `houghViz.mlapp`, allows you to visualize the preprocessing stages of the algorithm in real time.
+
+### Requirements
+
+The following MATLAB toolboxes are required:
+- `image_toolbox`
+- `statistics_toolbox`
+
+The app and script were last tested on version: `'9.8.0.1451342 (R2020a) Update 5'`.
 
 ### Example
 
